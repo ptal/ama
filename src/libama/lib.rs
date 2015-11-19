@@ -21,10 +21,10 @@ use code_gen::generate_rust_code;
 use quasiquote::Quasiquote;
 use compiler::Compiler;
 
+pub mod compiler;
 mod rust;
 mod token_flattener;
 mod code_gen;
-mod compiler;
 mod quasiquote;
 
 pub fn compile_anonymous_macro<C>(cx: &rust::ExtCtxt, tts: Vec<rust::TokenTree>,
