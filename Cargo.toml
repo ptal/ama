@@ -1,0 +1,10 @@
+[package]
+name = "ama"
+version = "0.1.0"
+authors = ["Pierre Talbot <ptalbot@hyc.io>"]
+
+[lib]
+
+name = "ama"
+path = "src/libama/lib.rs"
+crate_type = ["rlib", "dylib"]
