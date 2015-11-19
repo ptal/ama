@@ -32,67 +32,18 @@ extern crate syntax;
 
 use rust::Token as rtok;
 use rust::{TokenAndSpan, Span, token_to_string};
+use token_flattener::*;
+use code_gen::*;
 
 use std::collections::hash_map::HashMap;
 
 mod rust;
-
-/// TokenAndSpanArray is used to feed the parser with tokens.
-pub struct TokenAndSpanArray<'a>
-{
-  sp_diag: &'a rust::SpanHandler,
-  tokens: Vec<TokenAndSpan>,
-  current_idx: usize
-}
-
-impl<'a> TokenAndSpanArray<'a> {
-  fn new(sp_diag: &'a rust::SpanHandler, tokens: Vec<TokenAndSpan>)
-    -> TokenAndSpanArray<'a>
-  {
-    TokenAndSpanArray {
-      sp_diag: sp_diag,
-      tokens: tokens,
-      current_idx: 0
-    }
-  }
-
-  fn current(&self) -> TokenAndSpan {
-    self.tokens[self.current_idx].clone()
-  }
-
-  fn current_span(&self) -> Span {
-    self.current().sp
-  }
-}
-
-impl<'a> rust::lexer::Reader for TokenAndSpanArray<'a> {
-  fn is_eof(&self) -> bool {
-    self.current().tok == rtok::Eof
-  }
-
-  fn next_token(&mut self) -> TokenAndSpan {
-    let cur = self.current();
-    self.current_idx = self.current_idx + 1;
-    cur
-  }
-
-  fn fatal(&self, m: &str) -> rust::FatalError {
-    self.sp_diag.span_fatal(self.current_span(), m)
-  }
-
-  fn err(&self, m: &str) {
-    self.sp_diag.span_err(self.current_span(), m);
-  }
-
-  fn peek(&self) -> TokenAndSpan {
-    self.current()
-  }
-}
+mod token_flattener;
+mod code_gen;
 
 pub struct Expander<'a>
 {
   cx: &'a rust::ExtCtxt<'a>,
-  rp: rust::Parser<'a>,
   tokens: Vec<TokenAndSpan>
 }
 
@@ -103,55 +54,13 @@ impl<'a> Expander<'a>
   {
     Expander{
       cx: cx,
-      rp: rust::new_parser_from_tts(cx.parse_sess(), cx.cfg(), tts),
-      tokens: vec![]
+      tokens: TokenFlattener::flatten(cx, tts)
     }
   }
 
   pub fn expand(mut self) -> Box<rust::MacResult + 'a> {
-    self.flatten_tokens();
     self.replace_anonymous_macros();
-    self.into_rust_code()
-  }
-
-  fn flatten_tokens(&mut self) {
-    self.push_open_brace();
-    loop {
-      if self.rp.token == rtok::Eof {
-        self.push_close_brace();
-        self.push_current_tok();
-        break;
-      }
-      self.push_current_tok();
-      self.rp.bump().unwrap();
-    }
-  }
-
-  fn push_open_brace(&mut self) {
-    self.push_tok(rtok::OpenDelim(rust::DelimToken::Brace));
-  }
-
-  fn push_close_brace(&mut self) {
-    self.push_tok(rtok::CloseDelim(rust::DelimToken::Brace));
-  }
-
-  fn push_current_tok(&mut self) {
-    let cur = self.token_and_span();
-    self.tokens.push(cur);
-  }
-
-  fn token_and_span(&mut self) -> TokenAndSpan {
-    TokenAndSpan {
-      tok: self.rp.token.clone(),
-      sp: self.rp.span
-    }
-  }
-
-  fn push_tok(&mut self, tok: rtok) {
-    self.tokens.push(TokenAndSpan {
-      tok: tok,
-      sp: self.rp.span
-    })
+    code_gen::generate_rust_code(self.cx, self.tokens)
   }
 
   fn start_of_anon_macro(&self, idx: usize, delim: rust::DelimToken) -> bool {
@@ -225,16 +134,5 @@ impl<'a> Expander<'a>
     // let code_gen = CodeGenerator::new(self.cx, text_to_ident, span);
     // let expr = code_gen.generate_expr(text);
     rtok::Interpolated(rust::Nonterminal::NtExpr(quote_expr!(self.cx, {})))
-  }
-
-  fn into_rust_code(self) -> Box<rust::MacResult> {
-    let reader = Box::new(TokenAndSpanArray::new(
-      &self.cx.parse_sess().span_diagnostic,
-      self.tokens));
-    let mut parser = rust::Parser::new(self.cx.parse_sess(), self.cx.cfg(), reader);
-    let expr = parser.parse_expr_panic();
-    self.cx.parse_sess.span_diagnostic.handler.note(
-      &rust::expr_to_string(&expr));
-    rust::MacEager::expr(expr)
   }
 }
