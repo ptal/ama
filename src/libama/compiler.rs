@@ -12,26 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(rustc_private, quote)]
+use rust;
+use rust::{Ident, Span};
+use std::collections::hash_map::HashMap;
 
-extern crate syntax;
-
-use token_flattener::TokenFlattener;
-use code_gen::generate_rust_code;
-use quasiquote::Quasiquote;
-use compiler::Compiler;
-
-mod rust;
-mod token_flattener;
-mod code_gen;
-mod compiler;
-mod quasiquote;
-
-pub fn compile_anonymous_macro<C>(cx: &rust::ExtCtxt, tts: Vec<rust::TokenTree>,
-  compiler: &mut C) -> Box<rust::MacResult> where
- C: Compiler
+pub struct Unquote
 {
-  let tokens = TokenFlattener::flatten(cx, tts);
-  let tokens = Quasiquote::compile(cx, tokens, compiler);
-  generate_rust_code(cx, tokens)
+  pub text_to_ident: HashMap<String, Ident>,
+  pub code: String,
+  pub span: Span
+}
+
+pub trait Compiler
+{
+  fn compile_expr(&mut self, unquote: Unquote) -> rust::P<rust::Expr>;
+  fn compile_block(&mut self, unquote: Unquote) -> rust::P<rust::Block>;
 }
