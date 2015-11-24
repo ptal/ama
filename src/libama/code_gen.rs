@@ -23,7 +23,7 @@ pub fn generate_rust_code<'a>(cx: &'a rust::ExtCtxt<'a>, tokens: Vec<TokenAndSpa
     &cx.parse_sess().span_diagnostic,
     tokens));
   let mut parser = rust::Parser::new(cx.parse_sess(), cx.cfg(), reader);
-  let expr = parser.parse_expr_panic();
+  let expr = parser.parse_expr().unwrap();
   cx.parse_sess.span_diagnostic.handler.note(
     &rust::expr_to_string(&expr));
   rust::MacEager::expr(expr)
