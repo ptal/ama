@@ -24,7 +24,7 @@ pub fn generate_rust_code<'a>(cx: &'a rust::ExtCtxt<'a>, tokens: Vec<TokenAndSpa
     tokens));
   let mut parser = rust::Parser::new(cx.parse_sess(), cx.cfg(), reader);
   let expr = parser.parse_expr().unwrap();
-  cx.parse_sess.span_diagnostic.handler.note(
+  cx.parse_sess.span_diagnostic.note_without_error(
     &rust::expr_to_string(&expr));
   rust::MacEager::expr(expr)
 }
@@ -32,13 +32,13 @@ pub fn generate_rust_code<'a>(cx: &'a rust::ExtCtxt<'a>, tokens: Vec<TokenAndSpa
 /// TokenAndSpanArray is used to feed the parser with tokens.
 struct TokenAndSpanArray<'a>
 {
-  sp_diag: &'a rust::SpanHandler,
+  sp_diag: &'a rust::Handler,
   tokens: Vec<TokenAndSpan>,
   current_idx: usize
 }
 
 impl<'a> TokenAndSpanArray<'a> {
-  fn new(sp_diag: &'a rust::SpanHandler, tokens: Vec<TokenAndSpan>)
+  fn new(sp_diag: &'a rust::Handler, tokens: Vec<TokenAndSpan>)
     -> TokenAndSpanArray<'a>
   {
     TokenAndSpanArray {
