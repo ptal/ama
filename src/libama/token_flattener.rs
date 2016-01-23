@@ -50,7 +50,7 @@ impl<'a> TokenFlattener<'a>
         break;
       }
       self.push_current_tok();
-      self.rp.bump().unwrap();
+      self.rp.bump();
     }
   }
 
