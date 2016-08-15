@@ -6,7 +6,7 @@ authors = ["Pierre Talbot <ptalbot@hyc.io>"]
 description = "Generic interval and interval set library."
 repository = "https://github.com/ptal/ama"
 readme = "README.md"
-keywords = ["syntax", "quasiquote", "procedural macro", "EDSL"]
+keywords = ["syntax", "quasiquote", "macro", "EDSL"]
 license = "MIT/Apache-2.0"
 
 [lib]
