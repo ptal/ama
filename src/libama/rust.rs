@@ -1,4 +1,4 @@
-// Copyright 2015 Pierre Talbot (IRCAM)
+// Copyright 2014 Pierre Talbot (IRCAM)
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,25 +18,27 @@ pub use syntax::ast::*;
 pub use syntax::print::pprust::*;
 pub use syntax::print::pp;
 pub use syntax::util::small_vector::SmallVector;
-pub use syntax::codemap::{DUMMY_SP, Span, Spanned, spanned, mk_sp, respan, BytePos};
+pub use syntax::codemap::{DUMMY_SP, Span, MultiSpan, Spanned, spanned, mk_sp, respan, BytePos};
+pub use syntax::errors::*;
 pub use syntax::ext::base::{ExtCtxt,MacResult,MacEager,DummyResult};
 pub use syntax::ext::quote::rt::ToTokens;
 pub use syntax::ext::build::AstBuilder;
 pub use syntax::ext::base::SyntaxExtension;
+
 pub use syntax::parse::str_lit;
 pub use syntax::parse::parser::Parser;
 pub use syntax::parse::ParseSess;
+pub use syntax::parse::PResult;
 pub use syntax::parse::new_parser_from_tts;
 pub use syntax::parse::token::str_to_ident;
 pub use syntax::parse::token::Token;
-pub use syntax::parse::token;
-pub use syntax::parse::token::keywords::Keyword;
-pub use syntax::parse::token::DelimToken;
-pub use syntax::parse::token::IdentStyle;
-pub use syntax::parse::token::BinOpToken;
-pub use syntax::parse::token::Nonterminal;
-pub use syntax::parse::token::gensym_ident;
-
 pub use syntax::parse::lexer;
 pub use syntax::parse::lexer::TokenAndSpan;
-pub use syntax::errors::{FatalError, Handler};
+pub use syntax::tokenstream::*;
+pub use syntax::parse::token;
+pub use syntax::parse::token::Nonterminal;
+pub use syntax::parse::token::keywords::Keyword;
+pub use syntax::parse::token::DelimToken;
+pub use syntax::parse::token::BinOpToken;
+pub use syntax::parse::token::gensym_ident;
+pub use syntax::parse::parser::PathStyle;

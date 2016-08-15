@@ -19,19 +19,19 @@ use compiler::*;
 
 use std::collections::hash_map::HashMap;
 
-pub struct Quasiquote<'a, 'c, C> where C: 'c
+pub struct Quasiquote<'a, 'b:'a, 'c, C> where C: 'c
 {
-  cx: &'a rust::ExtCtxt<'a>,
+  cx: &'a rust::ExtCtxt<'b>,
   compiler: &'c mut C,
   tokens: Vec<TokenAndSpan>,
   current_idx: usize,
   unquoted_tokens: Vec<TokenAndSpan>
 }
 
-impl<'a, 'c, C> Quasiquote<'a, 'c, C> where
+impl<'a, 'b, 'c, C> Quasiquote<'a, 'b, 'c, C> where
   C: 'c + Compiler
 {
-  pub fn compile(cx: &'a rust::ExtCtxt, tokens: Vec<TokenAndSpan>, compiler: &'c mut C)
+  pub fn compile(cx: &'a rust::ExtCtxt<'b>, tokens: Vec<TokenAndSpan>, compiler: &'c mut C)
     -> Vec<TokenAndSpan>
   {
     let mut quasiquote = Quasiquote::new(cx, compiler, tokens);
@@ -39,8 +39,8 @@ impl<'a, 'c, C> Quasiquote<'a, 'c, C> where
     quasiquote.unquoted_tokens
   }
 
-  fn new(cx: &'a rust::ExtCtxt, compiler: &'c mut C, tokens: Vec<TokenAndSpan>)
-    -> Quasiquote<'a, 'c, C>
+  fn new(cx: &'a rust::ExtCtxt<'b>, compiler: &'c mut C, tokens: Vec<TokenAndSpan>)
+    -> Quasiquote<'a, 'b, 'c, C>
   {
     Quasiquote {
       cx: cx,
@@ -150,7 +150,7 @@ impl<'a, 'c, C> Quasiquote<'a, 'c, C> where
     let mut code = String::new();
     let mut text_to_ident = HashMap::new();
     for idx in (start_idx+2)..self.current_idx {
-      if let rtok::Ident(id, rust::IdentStyle::Plain) = self.tokens[idx].tok {
+      if let rtok::Ident(id) = self.tokens[idx].tok {
         text_to_ident.insert(format!("{}", id), id);
       }
       code.extend(token_to_string(&self.tokens[idx].tok).chars());

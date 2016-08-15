@@ -27,8 +27,8 @@ mod token_flattener;
 mod code_gen;
 mod quasiquote;
 
-pub fn compile_anonymous_macro<C>(cx: &rust::ExtCtxt, tts: Vec<rust::TokenTree>,
-  compiler: &mut C) -> Box<rust::MacResult> where
+pub fn compile_anonymous_macro<'a, 'b, C>(cx: &'a rust::ExtCtxt<'b>, tts: Vec<rust::TokenTree>,
+  compiler: &mut C) -> Box<rust::MacResult + 'a> where
  C: Compiler
 {
   let tokens = TokenFlattener::flatten(cx, tts);

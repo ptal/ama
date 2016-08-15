@@ -16,8 +16,8 @@ use rust;
 use rust::Token as rtok;
 use rust::{TokenAndSpan, Span};
 
-pub fn generate_rust_code<'a>(cx: &'a rust::ExtCtxt<'a>, tokens: Vec<TokenAndSpan>)
- -> Box<rust::MacResult>
+pub fn generate_rust_code<'a, 'b>(cx: &'a rust::ExtCtxt<'b>, tokens: Vec<TokenAndSpan>)
+ -> Box<rust::MacResult + 'a>
 {
   let reader = Box::new(TokenAndSpanArray::new(
     &cx.parse_sess().span_diagnostic,
@@ -62,6 +62,11 @@ impl<'a> rust::lexer::Reader for TokenAndSpanArray<'a> {
     self.current().tok == rtok::Eof
   }
 
+  fn try_next_token(&mut self) -> Result<TokenAndSpan, ()> {
+    // See `Reader::try_next_token` impl of `TtReader`, it cannot fail. Hypothesis: Probably because EOF is itself a token.
+    Ok(self.next_token())
+  }
+
   fn next_token(&mut self) -> TokenAndSpan {
     let cur = self.current();
     self.current_idx = self.current_idx + 1;
@@ -71,6 +76,8 @@ impl<'a> rust::lexer::Reader for TokenAndSpanArray<'a> {
   fn fatal(&self, m: &str) -> rust::FatalError {
     self.sp_diag.span_fatal(self.current_span(), m)
   }
+
+  fn emit_fatal_errors(&mut self) {}
 
   fn err(&self, m: &str) {
     self.sp_diag.span_err(self.current_span(), m);
