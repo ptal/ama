@@ -1,5 +1,5 @@
-Anonymous Procedural Macro System
-=================================
+Anonymous Procedural Macro
+==========================
 
 [![ptal on Travis CI][travis-image]][travis]
 
