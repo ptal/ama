@@ -1,9 +1,9 @@
 [package]
 name = "ama"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Pierre Talbot <ptalbot@hyc.io>"]
 
-description = "Generic interval and interval set library."
+description = "Quasi-quotation system for designing procedural macros mixed with Rust code."
 repository = "https://github.com/ptal/ama"
 readme = "README.md"
 keywords = ["syntax", "quasiquote", "macro", "EDSL"]
